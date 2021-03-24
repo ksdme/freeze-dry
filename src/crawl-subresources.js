@@ -56,7 +56,7 @@ async function crawlFrame(link, options) {
         // Apparently we could not capture the frame's DOM in the initial step. To still do the best
         // we can, we fetch and parse the framed document's html source and work with that.
         const fetchedResource = await fetchSubresource(link, options)
-        const html = await blobToText(fetchedResource.blob)
+        const html = await blobToText(fetchedResource.blob, options)
         const parser = new DOMParser()
         const innerDoc = parser.parseFromString(html, 'text/html')
         // Note that the final URL may differ from link.absoluteTarget in case of redirects.
@@ -84,7 +84,7 @@ async function crawlStylesheet(link, options) {
     const fetchedResource = await fetchSubresource(link, options)
     // Note that the final URL may differ from link.absoluteTarget in case of redirects.
     const stylesheetUrl = fetchedResource.url
-    const originalStylesheetText = await blobToText(fetchedResource.blob)
+    const originalStylesheetText = await blobToText(fetchedResource.blob, options)
 
     let links
     let getCurrentStylesheetText
@@ -134,9 +134,9 @@ async function fetchSubresource(link, options) {
     return resource
 }
 
-async function blobToText(blob) {
+async function blobToText(blob, options) {
     const text = await new Promise((resolve, reject) => {
-        const reader = new FileReader()
+        const reader = new options.FileReader()
         reader.onload = () => resolve(reader.result)
         reader.onerror = () => reject(reader.error)
         reader.readAsText(blob) // TODO should we know&tell which encoding to use?
